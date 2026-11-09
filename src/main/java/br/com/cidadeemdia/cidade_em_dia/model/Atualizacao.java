@@ -1,15 +1,6 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -42,62 +33,49 @@ public class Atualizacao {
     @Column(name = "DATA_ATUALIZACAO", nullable = false)
     private LocalDateTime dataAtualizacao;
 
-    public Atualizacao() {
+    protected Atualizacao() {
+    }
+
+    public Atualizacao(
+            Ocorrencia ocorrencia,
+            Usuario usuario,
+            StatusOcorrencia statusAnterior,
+            StatusOcorrencia statusNovo,
+            String descricao) {
+
+        this.ocorrencia = ocorrencia;
+        this.usuario = usuario;
+        this.statusAnterior = statusAnterior;
+        this.statusNovo = statusNovo;
+        this.descricao = descricao;
+        this.dataAtualizacao = LocalDateTime.now();
     }
 
     public Integer getIdAtualizacao() {
         return idAtualizacao;
     }
 
-    public void setIdAtualizacao(Integer idAtualizacao) {
-        this.idAtualizacao = idAtualizacao;
-    }
-
     public Ocorrencia getOcorrencia() {
         return ocorrencia;
-    }
-
-    public void setOcorrencia(Ocorrencia ocorrencia) {
-        this.ocorrencia = ocorrencia;
     }
 
     public Usuario getUsuario() {
         return usuario;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
     public StatusOcorrencia getStatusAnterior() {
         return statusAnterior;
-    }
-
-    public void setStatusAnterior(StatusOcorrencia statusAnterior) {
-        this.statusAnterior = statusAnterior;
     }
 
     public StatusOcorrencia getStatusNovo() {
         return statusNovo;
     }
 
-    public void setStatusNovo(StatusOcorrencia statusNovo) {
-        this.statusNovo = statusNovo;
-    }
-
     public String getDescricao() {
         return descricao;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
     public LocalDateTime getDataAtualizacao() {
         return dataAtualizacao;
-    }
-
-    public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
-        this.dataAtualizacao = dataAtualizacao;
     }
 }
