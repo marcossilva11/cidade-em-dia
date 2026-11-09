@@ -1,15 +1,6 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -51,86 +42,95 @@ public class Ocorrencia {
     @Column(name = "DATA_REGISTRO", nullable = false)
     private LocalDateTime dataRegistro;
 
-    public Ocorrencia() {
+    protected Ocorrencia() {
+    }
+
+    public Ocorrencia(
+            Usuario usuario,
+            Categoria categoria,
+            String descricao,
+            String endereco,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Integer gravidade) {
+
+        this.usuario = usuario;
+        this.categoria = categoria;
+        this.descricao = descricao;
+        this.endereco = endereco;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.gravidade = gravidade;
+    }
+
+    public void registrar() {
+        this.status = StatusOcorrencia.PENDENTE;
+        this.dataRegistro = LocalDateTime.now();
+    }
+
+    public void atualizarDados(
+            Categoria categoria,
+            String descricao,
+            String endereco,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Integer gravidade) {
+
+        this.categoria = categoria;
+        this.descricao = descricao;
+        this.endereco = endereco;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.gravidade = gravidade;
+    }
+
+    public void alterarStatus(StatusOcorrencia novoStatus) {
+        if (novoStatus == null) {
+            throw new IllegalArgumentException(
+                    "O novo status não pode ser nulo."
+            );
+        }
+
+        this.status = novoStatus;
     }
 
     public Integer getIdOcorrencia() {
         return idOcorrencia;
     }
 
-    public void setIdOcorrencia(Integer idOcorrencia) {
-        this.idOcorrencia = idOcorrencia;
-    }
-
     public Usuario getUsuario() {
         return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
     }
 
     public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
-    }
-
     public String getDescricao() {
         return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public String getEndereco() {
         return endereco;
     }
 
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
-    }
-
     public BigDecimal getLatitude() {
         return latitude;
-    }
-
-    public void setLatitude(BigDecimal latitude) {
-        this.latitude = latitude;
     }
 
     public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(BigDecimal longitude) {
-        this.longitude = longitude;
-    }
-
     public StatusOcorrencia getStatus() {
         return status;
-    }
-
-    public void setStatus(StatusOcorrencia status) {
-        this.status = status;
     }
 
     public Integer getGravidade() {
         return gravidade;
     }
 
-    public void setGravidade(Integer gravidade) {
-        this.gravidade = gravidade;
-    }
-
     public LocalDateTime getDataRegistro() {
         return dataRegistro;
-    }
-
-    public void setDataRegistro(LocalDateTime dataRegistro) {
-        this.dataRegistro = dataRegistro;
     }
 }

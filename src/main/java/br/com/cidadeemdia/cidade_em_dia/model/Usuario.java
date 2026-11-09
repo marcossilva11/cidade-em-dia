@@ -1,9 +1,6 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "USUARIO")
@@ -19,11 +16,19 @@ public class Usuario {
     @Column(name = "EMAIL", nullable = false, unique = true, length = 150)
     private String email;
 
-    public Usuario() {
+    @Column(name = "SENHA_HASH", nullable = false, length = 255)
+    private String senhaHash;
+
+    protected Usuario() {
     }
 
-    public Usuario(Integer idUsuario, String nome, String email) {
-        this.idUsuario = idUsuario;
+    public Usuario(String nome, String email, String senhaHash) {
+        this.nome = nome;
+        this.email = email;
+        this.senhaHash = senhaHash;
+    }
+
+    public void atualizarDados(String nome, String email) {
         this.nome = nome;
         this.email = email;
     }
@@ -32,23 +37,19 @@ public class Usuario {
         return idUsuario;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
     public String getNome() {
         return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getSenhaHash() {
+        return senhaHash;
+    }
+
+    public void alterarSenha(String novaSenhaHash) {
+        this.senhaHash = novaSenhaHash;
     }
 }

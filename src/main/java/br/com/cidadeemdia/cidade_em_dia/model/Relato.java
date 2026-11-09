@@ -1,14 +1,6 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.UniqueConstraint;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,38 +29,28 @@ public class Relato {
     @Column(name = "DATA_REGISTRO", nullable = false)
     private LocalDateTime dataRegistro;
 
-    public Relato() {
+    protected Relato() {
+    }
+
+    public Relato(Ocorrencia ocorrencia, Usuario usuario) {
+        this.ocorrencia = ocorrencia;
+        this.usuario = usuario;
+        this.dataRegistro = LocalDateTime.now();
     }
 
     public Integer getIdRelato() {
         return idRelato;
     }
 
-    public void setIdRelato(Integer idRelato) {
-        this.idRelato = idRelato;
-    }
-
     public Ocorrencia getOcorrencia() {
         return ocorrencia;
-    }
-
-    public void setOcorrencia(Ocorrencia ocorrencia) {
-        this.ocorrencia = ocorrencia;
     }
 
     public Usuario getUsuario() {
         return usuario;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
     public LocalDateTime getDataRegistro() {
         return dataRegistro;
-    }
-
-    public void setDataRegistro(LocalDateTime dataRegistro) {
-        this.dataRegistro = dataRegistro;
     }
 }

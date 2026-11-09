@@ -1,9 +1,6 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "CATEGORIA")
@@ -19,13 +16,15 @@ public class Categoria {
     @Column(name = "DESCRICAO", length = 255)
     private String descricao;
 
-    // Construtor vazio exigido pelo JPA
-    public Categoria() {
+    protected Categoria() {
     }
 
-    // Construtor com atributos
-    public Categoria(Integer idCategoria, String nome, String descricao) {
-        this.idCategoria = idCategoria;
+    public Categoria(String nome, String descricao) {
+        this.nome = nome;
+        this.descricao = descricao;
+    }
+
+    public void atualizarDados(String nome, String descricao) {
         this.nome = nome;
         this.descricao = descricao;
     }
@@ -34,23 +33,11 @@ public class Categoria {
         return idCategoria;
     }
 
-    public void setIdCategoria(Integer idCategoria) {
-        this.idCategoria = idCategoria;
-    }
-
     public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
     public String getDescricao() {
         return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 }
