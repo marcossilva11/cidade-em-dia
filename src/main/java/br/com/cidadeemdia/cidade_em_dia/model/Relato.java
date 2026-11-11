@@ -1,6 +1,7 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +16,12 @@ import java.time.LocalDateTime;
 public class Relato {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_relato")
+    @SequenceGenerator(
+            name = "seq_relato",
+            sequenceName = "SEQ_RELATO",
+            allocationSize = 1
+    )
     @Column(name = "ID_RELATO")
     private Integer idRelato;
 

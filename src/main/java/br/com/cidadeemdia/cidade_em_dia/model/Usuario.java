@@ -7,6 +7,12 @@ import jakarta.persistence.*;
 public class Usuario {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
+    @SequenceGenerator(
+            name = "seq_usuario",
+            sequenceName = "SEQ_USUARIO",
+            allocationSize = 1
+    )
     @Column(name = "ID_USUARIO")
     private Integer idUsuario;
 
