@@ -6,6 +6,10 @@ import br.com.cidadeemdia.cidade_em_dia.dao.OcorrenciaDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.RelatoDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.UsuarioDAO;
 
+import br.com.cidadeemdia.cidade_em_dia.dto.AtualizacaoResponseDTO;
+import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaRequestDTO;
+import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaResponseDTO;
+
 import br.com.cidadeemdia.cidade_em_dia.model.Atualizacao;
 import br.com.cidadeemdia.cidade_em_dia.model.Categoria;
 import br.com.cidadeemdia.cidade_em_dia.model.Ocorrencia;
@@ -45,61 +49,64 @@ public class OcorrenciaBO {
     }
 
     @Transactional(readOnly = true)
-    public List<Ocorrencia> listarTodas() {
-        return ocorrenciaDAO.findAllByOrderByDataRegistroDesc();
+    public List<OcorrenciaResponseDTO> listarTodas() {
+        return ocorrenciaDAO.findAllByOrderByDataRegistroDesc()
+                .stream()
+                .map(this::paraResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public Ocorrencia buscarPorId(Integer id) {
-        return ocorrenciaDAO.findById(id)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException("Ocorrência não encontrada."));
+    public OcorrenciaResponseDTO consultarPorId(Integer id) {
+        return paraResponse(buscarPorId(id));
     }
 
     @Transactional
-    public Ocorrencia cadastrar(Ocorrencia dados) {
+    public OcorrenciaResponseDTO cadastrar(OcorrenciaRequestDTO dto) {
 
-        validarOcorrencia(dados);
+        validarOcorrencia(dto);
 
-        Usuario usuario = buscarUsuario(dados.getUsuario().getIdUsuario());
-        Categoria categoria = buscarCategoria(dados.getCategoria().getIdCategoria());
+        if (dto.getIdUsuario() == null) {
+            throw new DadosInvalidosException("O ID do usuário é obrigatório.");
+        }
+
+        Usuario usuario = buscarUsuario(dto.getIdUsuario());
+        Categoria categoria = buscarCategoria(dto.getIdCategoria());
 
         Ocorrencia ocorrencia = new Ocorrencia(
                 usuario,
                 categoria,
-                dados.getDescricao(),
-                dados.getEndereco(),
-                dados.getLatitude(),
-                dados.getLongitude(),
-                dados.getGravidade()
+                dto.getDescricao(),
+                dto.getEndereco(),
+                dto.getLatitude(),
+                dto.getLongitude(),
+                dto.getGravidade()
         );
+
 
         ocorrencia.registrar();
 
-        return ocorrenciaDAO.save(ocorrencia);
+        return paraResponse(ocorrenciaDAO.save(ocorrencia));
     }
 
     @Transactional
-    public Ocorrencia atualizar(Integer id, Ocorrencia dados) {
+    public OcorrenciaResponseDTO atualizar(Integer id, OcorrenciaRequestDTO dto) {
 
-        validarOcorrencia(dados);
+        validarOcorrencia(dto);
 
         Ocorrencia ocorrencia = buscarPorId(id);
-
-        Categoria categoria = buscarCategoria(
-                dados.getCategoria().getIdCategoria()
-        );
+        Categoria categoria = buscarCategoria(dto.getIdCategoria());
 
         ocorrencia.atualizarDados(
                 categoria,
-                dados.getDescricao(),
-                dados.getEndereco(),
-                dados.getLatitude(),
-                dados.getLongitude(),
-                dados.getGravidade()
+                dto.getDescricao(),
+                dto.getEndereco(),
+                dto.getLatitude(),
+                dto.getLongitude(),
+                dto.getGravidade()
         );
 
-        return ocorrenciaDAO.save(ocorrencia);
+        return paraResponse(ocorrenciaDAO.save(ocorrencia));
     }
 
     @Transactional
@@ -124,7 +131,7 @@ public class OcorrenciaBO {
     }
 
     @Transactional
-    public Ocorrencia atualizarStatus(
+    public OcorrenciaResponseDTO atualizarStatus(
             Integer id,
             StatusOcorrencia novoStatus,
             Integer idUsuario,
@@ -159,52 +166,79 @@ public class OcorrenciaBO {
         ocorrenciaDAO.save(ocorrencia);
         atualizacaoDAO.save(atualizacao);
 
-        return ocorrencia;
+        return paraResponse(ocorrencia);
     }
 
     @Transactional(readOnly = true)
-    public List<Atualizacao> listarHistorico(Integer id) {
+    public List<AtualizacaoResponseDTO> listarHistorico(Integer id) {
 
         buscarPorId(id);
 
         return atualizacaoDAO
-                .findByOcorrencia_IdOcorrenciaOrderByDataAtualizacaoDesc(id);
+                .findByOcorrencia_IdOcorrenciaOrderByDataAtualizacaoDesc(id)
+                .stream()
+                .map(this::paraResponse)
+                .toList();
     }
 
-    private void validarOcorrencia(Ocorrencia ocorrencia) {
+    private OcorrenciaResponseDTO paraResponse(Ocorrencia o) {
+        return new OcorrenciaResponseDTO(
+                o.getIdOcorrencia(),
+                o.getUsuario().getNome(),
+                o.getCategoria().getNome(),
+                o.getDescricao(),
+                o.getEndereco(),
+                o.getLatitude(),
+                o.getLongitude(),
+                o.getStatus(),
+                o.getGravidade(),
+                o.getDataRegistro()
+        );
+    }
 
-        if (ocorrencia == null) {
+    private AtualizacaoResponseDTO paraResponse(Atualizacao a) {
+        return new AtualizacaoResponseDTO(
+                a.getIdAtualizacao(),
+                a.getUsuario().getNome(),
+                a.getStatusAnterior(),
+                a.getStatusNovo(),
+                a.getDescricao(),
+                a.getDataAtualizacao()
+        );
+    }
+
+    private Ocorrencia buscarPorId(Integer id) {
+        return ocorrenciaDAO.findById(id)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException("Ocorrência não encontrada."));
+    }
+
+    private void validarOcorrencia(OcorrenciaRequestDTO dto) {
+
+        if (dto == null) {
             throw new DadosInvalidosException(
                     "Os dados da ocorrência são obrigatórios."
             );
         }
 
-        if (ocorrencia.getUsuario() == null
-                || ocorrencia.getUsuario().getIdUsuario() == null) {
-            throw new DadosInvalidosException("O usuário é obrigatório.");
-        }
-
-        if (ocorrencia.getCategoria() == null
-                || ocorrencia.getCategoria().getIdCategoria() == null) {
-            throw new DadosInvalidosException("A categoria é obrigatória.");
-        }
-
-        if (ocorrencia.getDescricao() == null
-                || ocorrencia.getDescricao().isBlank()) {
+        if (dto.getDescricao() == null || dto.getDescricao().isBlank()) {
             throw new DadosInvalidosException("A descrição é obrigatória.");
         }
 
-        if (ocorrencia.getEndereco() == null
-                || ocorrencia.getEndereco().isBlank()) {
+        if (dto.getEndereco() == null || dto.getEndereco().isBlank()) {
             throw new DadosInvalidosException("O endereço é obrigatório.");
         }
 
-        if (ocorrencia.getGravidade() == null
-                || ocorrencia.getGravidade() < 1
-                || ocorrencia.getGravidade() > 5) {
+        if (dto.getGravidade() == null
+                || dto.getGravidade() < 1
+                || dto.getGravidade() > 5) {
             throw new DadosInvalidosException(
                     "A gravidade deve estar entre 1 e 5."
             );
+        }
+
+        if (dto.getIdCategoria() == null) {
+            throw new DadosInvalidosException("O ID da categoria é obrigatório.");
         }
     }
 

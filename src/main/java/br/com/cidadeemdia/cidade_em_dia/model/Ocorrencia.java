@@ -1,6 +1,7 @@
 package br.com.cidadeemdia.cidade_em_dia.model;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -9,6 +10,12 @@ import java.time.LocalDateTime;
 public class Ocorrencia {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_ocorrencia")
+    @SequenceGenerator(
+            name = "seq_ocorrencia",
+            sequenceName = "SEQ_OCORRENCIA",
+            allocationSize = 1
+    )
     @Column(name = "ID_OCORRENCIA")
     private Integer idOcorrencia;
 

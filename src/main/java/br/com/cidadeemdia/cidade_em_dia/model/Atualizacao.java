@@ -8,6 +8,12 @@ import java.time.LocalDateTime;
 public class Atualizacao {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_atualizacao")
+    @SequenceGenerator(
+            name = "seq_atualizacao",
+            sequenceName = "SEQ_ATUALIZACAO",
+            allocationSize = 1
+    )
     @Column(name = "ID_ATUALIZACAO")
     private Integer idAtualizacao;
 
