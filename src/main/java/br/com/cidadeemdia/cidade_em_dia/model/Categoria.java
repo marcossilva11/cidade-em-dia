@@ -16,10 +16,10 @@ public class Categoria {
     @Column(name = "ID_CATEGORIA")
     private Integer idCategoria;
 
-    @Column(name = "NOME", nullable = false, length = 100)
+    @Column(name = "NOME_CATEGORIA", nullable = false, unique = true, length = 50)
     private String nome;
 
-    @Column(name = "DESCRICAO", length = 255)
+    @Column(name = "DESCRICAO_CATEGORIA", length = 200)
     private String descricao;
 
     protected Categoria() {

@@ -1,7 +1,7 @@
 package br.com.cidadeemdia.cidade_em_dia.controller;
 
 import br.com.cidadeemdia.cidade_em_dia.bo.OcorrenciaBO;
-import br.com.cidadeemdia.cidade_em_dia.dto.AtualizacaoResponseDTO;
+import br.com.cidadeemdia.cidade_em_dia.dto.HistoricoResponseDTO;
 import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaRequestDTO;
 import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaResponseDTO;
 import br.com.cidadeemdia.cidade_em_dia.dto.StatusRequestDTO;
@@ -87,7 +87,7 @@ public class OcorrenciaController {
 
     // GET /ocorrencias/{id}/historico
     @GetMapping("/{id}/historico")
-    public ResponseEntity<List<AtualizacaoResponseDTO>> listarHistorico(
+    public ResponseEntity<List<HistoricoResponseDTO>> listarHistorico(
             @PathVariable Integer id) {
 
         return ResponseEntity.ok(ocorrenciaBO.listarHistorico(id));

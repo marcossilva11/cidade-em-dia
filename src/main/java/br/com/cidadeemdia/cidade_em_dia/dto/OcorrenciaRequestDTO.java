@@ -5,12 +5,14 @@ import java.math.BigDecimal;
 public class OcorrenciaRequestDTO {
 
     private Integer idUsuario;
+    private Integer idBairro;
     private Integer idCategoria;
+    private String titulo;
     private String descricao;
+    private String foto;
     private String endereco;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private Integer gravidade;
 
     public Integer getIdUsuario() {
         return idUsuario;
@@ -18,6 +20,14 @@ public class OcorrenciaRequestDTO {
 
     public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public Integer getIdBairro() {
+        return idBairro;
+    }
+
+    public void setIdBairro(Integer idBairro) {
+        this.idBairro = idBairro;
     }
 
     public Integer getIdCategoria() {
@@ -28,12 +38,28 @@ public class OcorrenciaRequestDTO {
         this.idCategoria = idCategoria;
     }
 
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
     public String getDescricao() {
         return descricao;
     }
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 
     public String getEndereco() {
@@ -58,13 +84,5 @@ public class OcorrenciaRequestDTO {
 
     public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
-    }
-
-    public Integer getGravidade() {
-        return gravidade;
-    }
-
-    public void setGravidade(Integer gravidade) {
-        this.gravidade = gravidade;
     }
 }
