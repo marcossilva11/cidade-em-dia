@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
         name = "RELATO",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        columnNames = {"ID_OCORRENCIA", "ID_USUARIO"}
+                        name = "UK_RELATO_USUARIO_OCORRENCIA",
+                        columnNames = {"OCORRENCIA_ID_OCORRENCIA", "USUARIO_ID_USUARIO"}
                 )
         }
 )
@@ -26,14 +27,14 @@ public class Relato {
     private Integer idRelato;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_OCORRENCIA", nullable = false)
+    @JoinColumn(name = "OCORRENCIA_ID_OCORRENCIA", nullable = false)
     private Ocorrencia ocorrencia;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_USUARIO", nullable = false)
+    @JoinColumn(name = "USUARIO_ID_USUARIO", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "DATA_REGISTRO", nullable = false)
+    @Column(name = "DT_REGISTRO_RELATO", nullable = false)
     private LocalDateTime dataRegistro;
 
     protected Relato() {

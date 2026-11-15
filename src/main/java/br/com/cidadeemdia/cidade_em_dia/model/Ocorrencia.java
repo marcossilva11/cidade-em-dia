@@ -20,85 +20,112 @@ public class Ocorrencia {
     private Integer idOcorrencia;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_USUARIO", nullable = false)
+    @JoinColumn(name = "USUARIO_ID_USUARIO", nullable = false)
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_CATEGORIA", nullable = false)
+    @JoinColumn(name = "BAIRRO_ID_BAIRRO", nullable = false)
+    private Bairro bairro;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CATEGORIA_ID_CATEGORIA", nullable = false)
     private Categoria categoria;
 
-    @Column(name = "DESCRICAO", nullable = false, length = 1000)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PRIORIDADE_ID_PRIORIDADE", nullable = false)
+    private Prioridade prioridade;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "STATUS_ID_STATUS", nullable = false)
+    private Status status;
+
+    @Column(name = "TITULO_OCORRENCIA", nullable = false, length = 100)
+    private String titulo;
+
+    @Column(name = "DESCRICAO_OCORRENCIA", nullable = false, length = 500)
     private String descricao;
 
-    @Column(name = "ENDERECO", nullable = false, length = 255)
+    @Column(name = "FOTO_OCORRENCIA", length = 500)
+    private String foto;
+
+    @Column(name = "DT_REGISTRO_OCORRENCIA", nullable = false)
+    private LocalDateTime dataRegistro;
+
+    @Column(name = "ENDERECO_OCORRENCIA", nullable = false, length = 200)
     private String endereco;
 
-    @Column(name = "LATITUDE", precision = 10, scale = 7)
+    @Column(name = "LATITUDE_OCORRENCIA", precision = 10, scale = 7)
     private BigDecimal latitude;
 
-    @Column(name = "LONGITUDE", precision = 10, scale = 7)
+    @Column(name = "LONGITUDE_OCORRENCIA", precision = 10, scale = 7)
     private BigDecimal longitude;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS", nullable = false, length = 30)
-    private StatusOcorrencia status;
-
-    @Column(name = "GRAVIDADE", nullable = false)
-    private Integer gravidade;
-
-    @Column(name = "DATA_REGISTRO", nullable = false)
-    private LocalDateTime dataRegistro;
 
     protected Ocorrencia() {
     }
 
     public Ocorrencia(
             Usuario usuario,
+            Bairro bairro,
             Categoria categoria,
+            Prioridade prioridade,
+            Status status,
+            String titulo,
             String descricao,
+            String foto,
             String endereco,
             BigDecimal latitude,
-            BigDecimal longitude,
-            Integer gravidade) {
+            BigDecimal longitude) {
 
         this.usuario = usuario;
+        this.bairro = bairro;
         this.categoria = categoria;
+        this.prioridade = prioridade;
+        this.status = status;
+        this.titulo = titulo;
         this.descricao = descricao;
+        this.foto = foto;
         this.endereco = endereco;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.gravidade = gravidade;
-    }
-
-    public void registrar() {
-        this.status = StatusOcorrencia.PENDENTE;
         this.dataRegistro = LocalDateTime.now();
     }
 
     public void atualizarDados(
+            Bairro bairro,
             Categoria categoria,
+            String titulo,
             String descricao,
+            String foto,
             String endereco,
             BigDecimal latitude,
-            BigDecimal longitude,
-            Integer gravidade) {
+            BigDecimal longitude) {
 
+        this.bairro = bairro;
         this.categoria = categoria;
+        this.titulo = titulo;
         this.descricao = descricao;
+        this.foto = foto;
         this.endereco = endereco;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.gravidade = gravidade;
     }
 
-    public void alterarStatus(StatusOcorrencia novoStatus) {
+    public void alterarStatus(Status novoStatus) {
         if (novoStatus == null) {
             throw new IllegalArgumentException(
                     "O novo status não pode ser nulo."
             );
         }
-
         this.status = novoStatus;
+    }
+
+    public void alterarPrioridade(Prioridade novaPrioridade) {
+        if (novaPrioridade == null) {
+            throw new IllegalArgumentException(
+                    "A nova prioridade não pode ser nula."
+            );
+        }
+        this.prioridade = novaPrioridade;
     }
 
     public Integer getIdOcorrencia() {
@@ -109,12 +136,36 @@ public class Ocorrencia {
         return usuario;
     }
 
+    public Bairro getBairro() {
+        return bairro;
+    }
+
     public Categoria getCategoria() {
         return categoria;
     }
 
+    public Prioridade getPrioridade() {
+        return prioridade;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
     public String getDescricao() {
         return descricao;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public LocalDateTime getDataRegistro() {
+        return dataRegistro;
     }
 
     public String getEndereco() {
@@ -127,17 +178,5 @@ public class Ocorrencia {
 
     public BigDecimal getLongitude() {
         return longitude;
-    }
-
-    public StatusOcorrencia getStatus() {
-        return status;
-    }
-
-    public Integer getGravidade() {
-        return gravidade;
-    }
-
-    public LocalDateTime getDataRegistro() {
-        return dataRegistro;
     }
 }

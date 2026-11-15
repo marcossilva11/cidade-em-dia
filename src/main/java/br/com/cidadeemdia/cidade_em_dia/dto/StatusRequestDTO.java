@@ -1,12 +1,10 @@
 package br.com.cidadeemdia.cidade_em_dia.dto;
 
-import br.com.cidadeemdia.cidade_em_dia.model.StatusOcorrencia;
-
 public class StatusRequestDTO {
 
     private Integer idUsuario;
-    private StatusOcorrencia status;
-    private String descricao;
+    private String status;      // nome do status: PENDENTE, EM_ANDAMENTO ou RESOLVIDO
+    private String descricao;   // observação gravada no histórico (opcional)
 
     public Integer getIdUsuario() {
         return idUsuario;
@@ -16,11 +14,11 @@ public class StatusRequestDTO {
         this.idUsuario = idUsuario;
     }
 
-    public StatusOcorrencia getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(StatusOcorrencia status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
