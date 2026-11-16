@@ -2,6 +2,7 @@ package br.com.cidadeemdia.cidade_em_dia.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -45,7 +46,35 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", ex.getMessage()));
     }
 
-    // JSON malformado ou valor inválido (ex.: status que não existe no enum)
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<Map<String, String>> tratarAcessoNegado(
+            AcessoNegadoException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<Map<String, String>> tratarCredenciaisInvalidas(
+            CredenciaisInvalidasException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("erro", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> tratarIntegridade(
+            DataIntegrityViolationException ex) {
+
+        log.warn("Violação de integridade de dados", ex);
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("erro", "A operação viola uma regra de integridade dos dados."));
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> tratarCorpoInvalido(
             HttpMessageNotReadableException ex) {
@@ -55,7 +84,6 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", "Corpo da requisição inválido ou malformado."));
     }
 
-    // Parâmetro de URL com tipo errado (ex.: /ocorrencias/abc)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> tratarTipoInvalido(
             MethodArgumentTypeMismatchException ex) {
@@ -69,8 +97,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> tratarErroInterno(
             Exception ex) {
 
-        // Erros do próprio Spring (rota inexistente = 404, método não permitido = 405, etc.)
-        // mantêm o status correto em vez de virarem 500.
         if (ex instanceof ErrorResponse erro) {
             return ResponseEntity
                     .status(erro.getStatusCode())

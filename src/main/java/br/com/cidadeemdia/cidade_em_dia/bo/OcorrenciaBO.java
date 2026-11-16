@@ -13,6 +13,7 @@ import br.com.cidadeemdia.cidade_em_dia.dto.HistoricoResponseDTO;
 import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaRequestDTO;
 import br.com.cidadeemdia.cidade_em_dia.dto.OcorrenciaResponseDTO;
 
+import br.com.cidadeemdia.cidade_em_dia.exception.AcessoNegadoException;
 import br.com.cidadeemdia.cidade_em_dia.exception.ConflitoException;
 import br.com.cidadeemdia.cidade_em_dia.exception.DadosInvalidosException;
 import br.com.cidadeemdia.cidade_em_dia.exception.RecursoNaoEncontradoException;
@@ -187,6 +188,14 @@ public class OcorrenciaBO {
             throw new DadosInvalidosException("O novo status é obrigatório.");
         }
 
+        Usuario usuario = buscarUsuario(idUsuario);
+
+        if (!usuario.isAdmin()) {
+            throw new AcessoNegadoException(
+                    "Apenas administradores podem alterar o status de uma ocorrência."
+            );
+        }
+
         Ocorrencia ocorrencia = buscarPorId(id);
 
         Status novoStatus = statusDAO
@@ -200,8 +209,7 @@ public class OcorrenciaBO {
             );
         }
 
-        Usuario usuario = buscarUsuario(idUsuario);
-
+        // OBSERVACAO_HISTORICO é obrigatória no banco
         String observacao = (descricao == null || descricao.isBlank())
                 ? "Status alterado para " + novoStatus.getNome() + "."
                 : descricao.trim();
