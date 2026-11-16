@@ -21,15 +21,18 @@ public class RelatoBO {
     private final RelatoDAO relatoDAO;
     private final OcorrenciaDAO ocorrenciaDAO;
     private final UsuarioDAO usuarioDAO;
+    private final PrioridadeBO prioridadeBO;
 
     public RelatoBO(
             RelatoDAO relatoDAO,
             OcorrenciaDAO ocorrenciaDAO,
-            UsuarioDAO usuarioDAO) {
+            UsuarioDAO usuarioDAO,
+            PrioridadeBO prioridadeBO) {
 
         this.relatoDAO = relatoDAO;
         this.ocorrenciaDAO = ocorrenciaDAO;
         this.usuarioDAO = usuarioDAO;
+        this.prioridadeBO = prioridadeBO;
     }
 
     @Transactional
@@ -49,6 +52,12 @@ public class RelatoBO {
                 .orElseThrow(() ->
                         new RecursoNaoEncontradoException("Usuário não encontrado."));
 
+        if (ocorrencia.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new ConflitoException(
+                    "O autor da ocorrência não pode confirmá-la."
+            );
+        }
+
         boolean jaConfirmou =
                 relatoDAO.existsByOcorrencia_IdOcorrenciaAndUsuario_IdUsuario(
                         idOcorrencia,
@@ -61,8 +70,10 @@ public class RelatoBO {
             );
         }
 
-        Relato relato = new Relato(ocorrencia, usuario);
+        Relato relato = relatoDAO.save(new Relato(ocorrencia, usuario));
 
-        return relatoDAO.save(relato);
+        prioridadeBO.reavaliar(ocorrencia);
+
+        return relato;
     }
 }

@@ -4,7 +4,6 @@ import br.com.cidadeemdia.cidade_em_dia.dao.BairroDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.CategoriaDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.HistoricoOcorrenciaDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.OcorrenciaDAO;
-import br.com.cidadeemdia.cidade_em_dia.dao.PrioridadeDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.RelatoDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.StatusDAO;
 import br.com.cidadeemdia.cidade_em_dia.dao.UsuarioDAO;
@@ -30,13 +29,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class OcorrenciaBO {
 
     private static final String STATUS_INICIAL = "PENDENTE";
-    private static final String PRIORIDADE_INICIAL = "BAIXA";
 
     private static final int MAX_TITULO = 100;
     private static final int MAX_DESCRICAO = 500;
@@ -51,7 +50,7 @@ public class OcorrenciaBO {
     private final CategoriaDAO categoriaDAO;
     private final BairroDAO bairroDAO;
     private final StatusDAO statusDAO;
-    private final PrioridadeDAO prioridadeDAO;
+    private final PrioridadeBO prioridadeBO;
 
     public OcorrenciaBO(
             OcorrenciaDAO ocorrenciaDAO,
@@ -61,7 +60,7 @@ public class OcorrenciaBO {
             CategoriaDAO categoriaDAO,
             BairroDAO bairroDAO,
             StatusDAO statusDAO,
-            PrioridadeDAO prioridadeDAO) {
+            PrioridadeBO prioridadeBO) {
 
         this.ocorrenciaDAO = ocorrenciaDAO;
         this.relatoDAO = relatoDAO;
@@ -70,13 +69,51 @@ public class OcorrenciaBO {
         this.categoriaDAO = categoriaDAO;
         this.bairroDAO = bairroDAO;
         this.statusDAO = statusDAO;
-        this.prioridadeDAO = prioridadeDAO;
+        this.prioridadeBO = prioridadeBO;
     }
 
+    /**
+     * parametro ordenarPor "prioridade" (mais urgentes primeiro) ou "data" (padrao: mais recentes primeiro)
+     * parametro nomeStatus filtro opcional por status (PENDENTE, EM_ANDAMENTO, RESOLVIDO)
+     */
     @Transactional(readOnly = true)
-    public List<OcorrenciaResponseDTO> listarTodas() {
-        return ocorrenciaDAO.findAllByOrderByDataRegistroDesc()
-                .stream()
+    public List<OcorrenciaResponseDTO> listarTodas(String ordenarPor, String nomeStatus) {
+
+        boolean porPrioridade = "prioridade".equalsIgnoreCase(
+                ordenarPor == null ? "" : ordenarPor.trim());
+
+        if (ordenarPor != null && !ordenarPor.isBlank()
+                && !porPrioridade
+                && !"data".equalsIgnoreCase(ordenarPor.trim())) {
+            throw new DadosInvalidosException(
+                    "O parâmetro ordenarPor deve ser 'prioridade' ou 'data'."
+            );
+        }
+
+        List<Ocorrencia> ocorrencias;
+
+        if (nomeStatus == null || nomeStatus.isBlank()) {
+            ocorrencias = ocorrenciaDAO.findAllByOrderByDataRegistroDesc();
+        } else {
+            String nome = nomeStatus.trim().toUpperCase();
+
+            statusDAO.findByNome(nome)
+                    .orElseThrow(() -> new DadosInvalidosException(
+                            "Status inválido: " + nomeStatus.trim() + "."));
+
+            ocorrencias = ocorrenciaDAO.findByStatus_NomeOrderByDataRegistroDesc(nome);
+        }
+
+        if (porPrioridade) {
+            ocorrencias = ocorrencias.stream()
+                    .sorted(Comparator
+                            .comparing((Ocorrencia o) -> o.getPrioridade().getIdPrioridade())
+                            .reversed()
+                            .thenComparing(Ocorrencia::getDataRegistro))
+                    .toList();
+        }
+
+        return ocorrencias.stream()
                 .map(this::paraResponse)
                 .toList();
     }
@@ -100,10 +137,7 @@ public class OcorrenciaBO {
                         "Status inicial '" + STATUS_INICIAL
                                 + "' não cadastrado no banco."));
 
-        Prioridade prioridadeInicial = prioridadeDAO.findByNome(PRIORIDADE_INICIAL)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Prioridade inicial '" + PRIORIDADE_INICIAL
-                                + "' não cadastrada no banco."));
+        Prioridade prioridadeInicial = prioridadeBO.prioridadeInicial(categoria);
 
         Ocorrencia ocorrencia = new Ocorrencia(
                 usuario,
@@ -151,7 +185,11 @@ public class OcorrenciaBO {
                 dto.getLongitude()
         );
 
-        return paraResponse(ocorrenciaDAO.save(ocorrencia));
+        ocorrenciaDAO.save(ocorrencia);
+
+        prioridadeBO.reavaliar(ocorrencia);
+
+        return paraResponse(ocorrencia);
     }
 
     @Transactional
@@ -209,7 +247,6 @@ public class OcorrenciaBO {
             );
         }
 
-        // OBSERVACAO_HISTORICO é obrigatória no banco
         String observacao = (descricao == null || descricao.isBlank())
                 ? "Status alterado para " + novoStatus.getNome() + "."
                 : descricao.trim();
@@ -241,6 +278,20 @@ public class OcorrenciaBO {
                 .toList();
     }
 
+    @Transactional
+    public int recalcularPrioridades(Integer idUsuario) {
+
+        Usuario usuario = buscarUsuario(idUsuario);
+
+        if (!usuario.isAdmin()) {
+            throw new AcessoNegadoException(
+                    "Apenas administradores podem recalcular as prioridades."
+            );
+        }
+
+        return prioridadeBO.recalcularTodas();
+    }
+
     private OcorrenciaResponseDTO paraResponse(Ocorrencia o) {
         return new OcorrenciaResponseDTO(
                 o.getIdOcorrencia(),
@@ -255,6 +306,7 @@ public class OcorrenciaBO {
                 o.getLongitude(),
                 o.getStatus().getNome(),
                 o.getPrioridade().getNome(),
+                relatoDAO.countByOcorrencia_IdOcorrencia(o.getIdOcorrencia()),
                 o.getDataRegistro()
         );
     }

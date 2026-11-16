@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/ocorrencias")
@@ -29,10 +31,13 @@ public class OcorrenciaController {
         this.ocorrenciaBO = ocorrenciaBO;
     }
 
-    // GET /ocorrencias
+    // GET /ocorrencias?ordenarPor=prioridade&status=PENDENTE
     @GetMapping
-    public ResponseEntity<List<OcorrenciaResponseDTO>> listar() {
-        return ResponseEntity.ok(ocorrenciaBO.listarTodas());
+    public ResponseEntity<List<OcorrenciaResponseDTO>> listar(
+            @RequestParam(name = "ordenarPor", required = false) String ordenarPor,
+            @RequestParam(name = "status", required = false) String status) {
+
+        return ResponseEntity.ok(ocorrenciaBO.listarTodas(ordenarPor, status));
     }
 
     // GET /ocorrencias/{id}
@@ -82,6 +87,16 @@ public class OcorrenciaController {
                         dto.getIdUsuario(),
                         dto.getDescricao()
                 )
+        );
+    }
+
+    // POST /ocorrencias/recalcular-prioridades?idUsuario=1  (somente ADMIN)
+    @PostMapping("/recalcular-prioridades")
+    public ResponseEntity<Map<String, Integer>> recalcularPrioridades(
+            @RequestParam(name = "idUsuario", required = false) Integer idUsuario) {
+
+        return ResponseEntity.ok(
+                Map.of("atualizadas", ocorrenciaBO.recalcularPrioridades(idUsuario))
         );
     }
 

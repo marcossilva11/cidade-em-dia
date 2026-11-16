@@ -17,6 +17,7 @@ public class OcorrenciaResponseDTO {
     private BigDecimal longitude;
     private String status;
     private String prioridade;
+    private long quantidadeRelatos;
     private LocalDateTime dataRegistro;
 
     public OcorrenciaResponseDTO(Integer idOcorrencia, String titulo,
@@ -25,6 +26,7 @@ public class OcorrenciaResponseDTO {
                                  String foto, String endereco,
                                  BigDecimal latitude, BigDecimal longitude,
                                  String status, String prioridade,
+                                 long quantidadeRelatos,
                                  LocalDateTime dataRegistro) {
 
         this.idOcorrencia = idOcorrencia;
@@ -39,6 +41,7 @@ public class OcorrenciaResponseDTO {
         this.longitude = longitude;
         this.status = status;
         this.prioridade = prioridade;
+        this.quantidadeRelatos = quantidadeRelatos;
         this.dataRegistro = dataRegistro;
     }
 
@@ -88,6 +91,10 @@ public class OcorrenciaResponseDTO {
 
     public String getPrioridade() {
         return prioridade;
+    }
+
+    public long getQuantidadeRelatos() {
+        return quantidadeRelatos;
     }
 
     public LocalDateTime getDataRegistro() {
